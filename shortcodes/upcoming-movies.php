@@ -1,6 +1,5 @@
 <?php
 
-
 /* ---------------------------------------------------
  * 1) SHORTCODE: [upcoming_movies number=10]
  * -------------------------------------------------- */
@@ -41,7 +40,7 @@ function tmdb_show_upcoming_movies( $atts ) {
 
 	$movies = array_slice( $data['results'], 0, $number );
 
-	$output = '<div class="tmdb-movie-list" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;">';
+	$output = '<div class="tmdb-movie-list">';
 
 	foreach ( $movies as $movie ) {
 		if ( empty( $movie['title'] ) ) {
@@ -53,18 +52,19 @@ function tmdb_show_upcoming_movies( $atts ) {
 		$releaseDate = esc_html( $movie['release_date'] );
 		$overview    = esc_html( wp_trim_words( $movie['overview'], 30 ) );
 		$poster      = $movie['poster_path'] ? esc_url( 'https://image.tmdb.org/t/p/w300' . $movie['poster_path'] ) : '';
-		//$detail_url  = esc_url( home_url( '/movies/' . $slug ) );
-
-        $movie_id = intval( $movie['id'] );
+		$movie_id = intval( $movie['id'] );
         $detail_url = esc_url( home_url( '/movie-detail-page?movie_id=' . $movie_id ) );
 
-
-		$output .= '<div style="background:#fafafa;border-radius:8px;padding:15px;text-align:center;box-shadow:0 2px 6px rgba(0,0,0,.07);">';
+		$output .= '<div class="tmdb-movie-list__item">';
 		if ( $poster ) {
-			$output .= "<a href='{$detail_url}'><img src='{$poster}' alt='{$title}' style='max-width:100%;height:auto;border-radius:6px;margin-bottom:10px'></a>";
+			$output .= "<a href='{$detail_url}'><img src='{$poster}' alt='{$title}'></a>";
 		}
-		$output .= "<a href='{$detail_url}' style='text-decoration:none;color:inherit;'><strong>{$title}</strong></a><br>";
-		$output .= "<em>{$releaseDate}</em><p style='font-size:13px'>{$overview}</p>";
+		$output .= "<a href='{$detail_url}'><h3>{$title}</h3></a><br>";
+		$output .= "<em>{$releaseDate}</em><p>{$overview}</p>";
+		
+		// WISHLIST 
+		$output .= tmdb_get_wishlist_button($movie_id, $title, $poster);
+		
 		$output .= '</div>';
 	}
 
@@ -72,8 +72,4 @@ function tmdb_show_upcoming_movies( $atts ) {
 
 	return $output;
 }
-
-
-
-
 ?>

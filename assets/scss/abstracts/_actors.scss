@@ -1,0 +1,136 @@
+@use "abstracts/variables" as *;
+@use "abstracts/mixins" as *;  
+
+
+
+@mixin responsive-grid($min-width: 150px, $gap: 20px) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax($min-width, 1fr));
+  gap: $gap;
+}
+
+// Bloque principal: tmdb-actors
+.tmdb-actors {
+  @include responsive-grid(150px, 20px);
+  font-family: var(--font-primary);
+  background-color: var(--bg-gray-color);
+    padding: 2rem;
+  
+  // Elemento: item
+  &__item {
+    text-align: center;
+    background: rgba( 255, 255, 255, 0.25 );
+        box-shadow: 0 8px 32px 0 rgba( 31, 38, 135, 0.37 );
+        backdrop-filter: blur( 14.5px );
+        -webkit-backdrop-filter: blur( 14.5px );
+        border-radius: 10px;
+        border: 1px solid rgba( 255, 255, 255, 0.18 );
+        border-radius:8px;
+        padding:15px;
+        text-align:center;
+        box-shadow:0 2px 6px rgba(0,0,0,.07);
+         &:hover {
+           transform: scale(1.05);
+           transition: .3s ease;
+         }
+  }
+  
+  // Elemento: link
+  &__link {
+    display: inline-block;
+    text-decoration: none;
+    transition: transform 0.3s ease;
+    
+   
+  }
+  &__image {
+    width: 100%;
+    max-width: 150px;
+    margin-bottom: 10px;
+    object-fit: cover;
+    transition: opacity 0.3s ease;
+    
+    &:hover {
+      opacity: 0.9;
+    }
+  }
+  
+
+  &__info {
+    padding-top: 5px;
+  }
+  
+
+  &__name {
+    font-weight: bold;
+    font-size: 2rem;
+    font-family: var(--font-title);
+    color: var(--primary-color);
+    text-decoration: none;
+    display: block;
+    transition: color 0.3s ease;
+    
+    &:hover {
+      color: var(--purple-color);
+    }
+    
+    &:visited {
+      color: var(--primary-color);
+    }
+  }
+}
+
+// Modificadores opcionales
+.tmdb-actors {
+  // Modificador: lista compacta
+  &--compact {
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 15px;
+    
+    .tmdb-actors__image {
+      max-width: 120px;
+      margin-bottom: 8px;
+    }
+  }
+  
+  // Modificador: lista extendida
+  &--extended {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 25px;
+    
+    .tmdb-actors__image {
+      max-width: 200px;
+      margin-bottom: 15px;
+    }
+  }
+}
+
+// Responsive design usando tus mixins
+.tmdb-actors {
+  @include mq(md) {
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 22px;
+    
+    &__image {
+      max-width: 160px;
+    }
+  }
+  
+  @include mq(lg) {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 25px;
+    
+    &__image {
+      max-width: 180px;
+    }
+  }
+  
+  @include mq(xl) {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 30px;
+    
+    &__image {
+      max-width: 200px;
+    }
+  }
+}

@@ -2,7 +2,8 @@
 
 function tmdb_actor_list_shortcode() {
     // API Key directa (reemplaza con tu función tmdb_get_api_key() si la tienes)
-    $api_key = '8767e6a8f4117ff149f1fb513e439f11';
+    
+    $api_key = tmdb_get_api_key(); 
     if ( empty($api_key) ) {
         return '<p>API key no configurada.</p>';
     }
@@ -104,18 +105,22 @@ function tmdb_actor_list_shortcode() {
     }
 
     // Formulario filtros
-    $output = "<form method='get' style='margin-bottom:20px; padding:15px; background:#f9f9f9; border-radius:5px;'>
-        <label style='margin-right:15px;'>
-            Filtrar por nombre: 
-            <input type='text' name='filter_name' value='". esc_attr($filter_name) ."' style='margin-left:5px; padding:5px;' />
-        </label>
-        <label style='margin-right:15px;'>
-            Filtrar por película: 
-            <input type='text' name='filter_movie' value='". esc_attr($filter_movie) ."' style='margin-left:5px; padding:5px;' />
-        </label>
-        <input type='submit' value='Filtrar' style='padding:5px 15px; background:#0073aa; color:white; border:none; border-radius:3px; cursor:pointer;'/>
-        " . (!empty($filter_name) || !empty($filter_movie) ? "<a href='". tmdb_build_pagination_url(1, '', '') ."' style='margin-left:10px; color:#666; text-decoration:none;'>Limpiar filtros</a>" : "") . "
-    </form>";
+$output = "<div id='tmdb-search-container-actors' class='search-container-actors'>
+  <div class='tmdb-search-form-actors'>
+    <form method='get' class='tmdb-search-form-actors__actors'>
+     <label class='tmdb-search-form-actors__options-actors'>
+    <input class='tmdb-search-input-actors' type='text' name='filter_name' placeholder='filter by name' value='". esc_attr($filter_name) ."' />
+    </label>
+    <label class='tmdb-search-form-actors__options-actors'>
+    <input class='tmdb-search-input-actors' type='text' name='filter_movie' placeholder='filter by movie' value='". esc_attr($filter_movie) ."' />
+    </label>
+    <div class='tmdb-search-form-actors__actors-filter'>
+    <button type='submit'>Filtrar</button>
+    " . (!empty($filter_name) || !empty($filter_movie) ? "<a href='". tmdb_build_pagination_url(1, '', '') ."'>Limpiar filtros</a>" : "") . "
+    </div>
+    </form>
+    </div>
+ </div>";
 
     if (empty($actors)) {
         $output .= '<p>No actors were found..</p>';
@@ -125,44 +130,50 @@ function tmdb_actor_list_shortcode() {
     // Información de resultados
     $start_result = (($current_page - 1) * $items_per_page) + 1;
     $end_result = min($current_page * $items_per_page, $total_results);
-    $output .= "<div style='margin-bottom:15px; color:#666; font-size:14px;'>
-        Mostrando {$start_result}-{$end_result} de " . number_format($total_results) . " resultados (máximo 400)
+    $output .= "<div class='tmdb-results-info'>
+        Showing {$start_result}-{$end_result} of " . number_format($total_results) . " results (maximum 400)
     </div>";
 
     // Mostrar actores
-    $output .= '<div class="tmdb-actor-list" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:20px;margin-bottom:30px;">';
+    $output .= '<div class="tmdb-actors">';
     foreach ($actors as $actor) {
         $name = esc_html($actor['name'] ?? 'Nombre no disponible');
         $profile = !empty($actor['profile_path']) ? esc_url('https://image.tmdb.org/t/p/w300' . $actor['profile_path']) : '';
         $actor_id = intval($actor['id'] ?? 0);
         $actor_url = site_url("/actor-detail?actor_id={$actor_id}");
 
-        $output .= '<div style="text-align:center; padding:15px; border:1px solid #ddd; border-radius:8px; background:white; box-shadow:0 2px 4px rgba(0,0,0,0.1);">';
+        $output .= '<div class="tmdb-actors__item">';
+        
         if ($profile) {
-            $output .= "<a href='{$actor_url}'><img src='{$profile}' alt='{$name}' style='width:100%;border-radius:50%;max-width:120px;height:120px;object-fit:cover;margin-bottom:10px;'></a>";
+            $output .= "<a href='{$actor_url}' class='tmdb-actors__link'>";
+            $output .= "<img src='{$profile}' alt='{$name}' class='tmdb-actors__image'>";
+            $output .= "</a>";
         } else {
-            $output .= "<div style='width:120px;height:120px;background:#f0f0f0;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;color:#999;font-size:12px;'>Sin foto</div>";
+            $output .= "<div class='tmdb-actors__image tmdb-actors__image--placeholder'>No Photo</div>";
         }
-        $output .= "<div><a href='{$actor_url}' style='text-decoration:none; color:#333;'><strong>{$name}</strong></a></div>";
+        
+        $output .= "<div class='tmdb-actors__info'>";
+        $output .= "<a href='{$actor_url}' class='tmdb-actors__name'>{$name}</a>";
+        $output .= "</div>";
         $output .= '</div>';
     }
     $output .= '</div>';
 
     // Mostrar paginación si hay más de 1 página
     if ( $total_pages > 1 ) {
-        $output .= '<div class="tmdb-pagination" style="margin-top:30px;text-align:center;padding:20px;background:#f9f9f9;border-radius:5px;">';
+        $output .= '<div class="tmdb-pagination">';
 
         // Link a primera página
         if ($current_page > 3) {
             $first_url = tmdb_build_pagination_url(1, $filter_name, $filter_movie);
-            $output .= "<a href='{$first_url}' style='margin:0 3px; padding:8px 12px; background:#f1f1f1; color:#333; text-decoration:none; border-radius:3px;'>1</a>";
-            $output .= " <span style='margin:0 3px;'>...</span> ";
+            $output .= "<a href='{$first_url}' class='tmdb-pagination__link'>1</a>";
+            $output .= "<span class='tmdb-pagination__ellipsis'>...</span>";
         }
 
         // Link a página anterior
         if ($current_page > 1) {
             $prev_url = tmdb_build_pagination_url($current_page - 1, $filter_name, $filter_movie);
-            $output .= "<a href='{$prev_url}' style='margin:0 5px; padding:10px 15px; background:#0073aa; color:white; text-decoration:none; border-radius:5px;'>‹ Anterior</a> ";
+            $output .= "<a href='{$prev_url}' class='tmdb-pagination__nav tmdb-pagination__nav--prev'>‹ Back</a>";
         }
 
         // Mostrar páginas alrededor de la actual
@@ -171,27 +182,27 @@ function tmdb_actor_list_shortcode() {
 
         for ($i = $start_page; $i <= $end_page; $i++) {
             if ($i == $current_page) {
-                $output .= "<span style='margin:0 3px; padding:8px 12px; background:#0073aa; color:white; border-radius:3px; font-weight:bold;'>{$i}</span> ";
+                $output .= "<span class='tmdb-pagination__current'>{$i}</span>";
             } else {
                 $page_url = tmdb_build_pagination_url($i, $filter_name, $filter_movie);
-                $output .= "<a href='{$page_url}' style='margin:0 3px; padding:8px 12px; background:#f1f1f1; color:#333; text-decoration:none; border-radius:3px;'>{$i}</a> ";
+                $output .= "<a href='{$page_url}' class='tmdb-pagination__link'>{$i}</a>";
             }
         }
 
         // Link a página siguiente
         if ($current_page < $total_pages) {
             $next_url = tmdb_build_pagination_url($current_page + 1, $filter_name, $filter_movie);
-            $output .= " <a href='{$next_url}' style='margin:0 5px; padding:10px 15px; background:#0073aa; color:white; text-decoration:none; border-radius:5px;'>Siguiente ›</a>";
+            $output .= "<a href='{$next_url}' class='tmdb-pagination__nav tmdb-pagination__nav--next'>Next ›</a>";
         }
 
         // Link a última página
         if ($current_page < $total_pages - 2) {
-            $output .= " <span style='margin:0 3px;'>...</span> ";
+            $output .= "<span class='tmdb-pagination__ellipsis'>...</span>";
             $last_url = tmdb_build_pagination_url($total_pages, $filter_name, $filter_movie);
-            $output .= "<a href='{$last_url}' style='margin:0 3px; padding:8px 12px; background:#f1f1f1; color:#333; text-decoration:none; border-radius:3px;'>{$total_pages}</a>";
+            $output .= "<a href='{$last_url}' class='tmdb-pagination__link'>{$total_pages}</a>";
         }
 
-        $output .= "<div style='margin-top:15px; font-size:14px; color:#666;'>Página {$current_page} de {$total_pages}</div>";
+        $output .= "<div class='tmdb-pagination__info'>Página {$current_page} de {$total_pages}</div>";
         $output .= '</div>';
     }
 

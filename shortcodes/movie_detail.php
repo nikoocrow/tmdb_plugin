@@ -87,7 +87,7 @@ function tmdb_show_movie_detail( $atts ) {
     // Get cast (first 10)
     $cast_html = '';
     if ( !empty( $movie_data['credits']['cast'] ) ) {
-        $cast_html = '<div class="cast-list">';
+        $cast_html = '<div class="movie-detail__cast-list">';
         $cast_count = 0;
         foreach ( $movie_data['credits']['cast'] as $actor ) {
             if ( $cast_count >= 10 ) break;
@@ -96,9 +96,10 @@ function tmdb_show_movie_detail( $atts ) {
             $actor_id = intval( $actor['id'] );
             
             // Link to actor detail page (you'll need to implement this)
-            $cast_html .= '<div class="cast-member" style="display: inline-block; margin: 5px 10px 5px 0; padding: 5px; background: #f5f5f5; border-radius: 4px;">';
-            $cast_html .= '<a href="?actor_id=' . $actor_id . '" style="text-decoration: none; color: #333;">';
-            $cast_html .= '<strong>' . $actor_name . '</strong><br><small>as ' . $character . '</small>';
+            $cast_html .= '<div class="movie-detail__cast-member">';
+            $cast_html .= '<a href="?actor_id=' . $actor_id . '" class="movie-detail__cast-link">';
+            $cast_html .= '<strong class="movie-detail__actor-name">' . $actor_name . '</strong>';
+            $cast_html .= '<br><small class="movie-detail__character">as ' . $character . '</small>';
             $cast_html .= '</a></div>';
             $cast_count++;
         }
@@ -108,7 +109,7 @@ function tmdb_show_movie_detail( $atts ) {
     // Get reviews (first 3)
     $reviews_html = '';
     if ( !empty( $movie_data['reviews']['results'] ) ) {
-        $reviews_html = '<div class="reviews-section">';
+        $reviews_html = '<div class="movie-detail__reviews">';
         $review_count = 0;
         foreach ( $movie_data['reviews']['results'] as $review ) {
             if ( $review_count >= 3 ) break;
@@ -116,9 +117,9 @@ function tmdb_show_movie_detail( $atts ) {
             $rating = isset( $review['author_details']['rating'] ) ? esc_html( $review['author_details']['rating'] ) : 'N/A';
             $content = esc_html( wp_trim_words( $review['content'], 50 ) );
             
-            $reviews_html .= '<div class="review" style="margin-bottom: 15px; padding: 10px; background: #f9f9f9; border-radius: 4px;">';
-            $reviews_html .= '<h5 style="margin: 0 0 5px 0;">Review by ' . $author . ' (Rating: ' . $rating . '/10)</h5>';
-            $reviews_html .= '<p style="margin: 0; font-size: 14px;">' . $content . '...</p>';
+            $reviews_html .= '<div class="movie-detail__review">';
+            $reviews_html .= '<h5 class="movie-detail__review-header">Review by ' . $author . ' (Rating: ' . $rating . '/10)</h5>';
+            $reviews_html .= '<p class="movie-detail__review-content">' . $content . '...</p>';
             $reviews_html .= '</div>';
             $review_count++;
         }
@@ -128,7 +129,7 @@ function tmdb_show_movie_detail( $atts ) {
     // Get similar movies (first 6)
     $similar_html = '';
     if ( !empty( $movie_data['similar']['results'] ) ) {
-        $similar_html = '<div class="similar-movies" style="display: flex; flex-wrap: wrap; gap: 10px;">';
+        $similar_html = '<div class="movie-detail__similar-movies">';
         $similar_count = 0;
         foreach ( $movie_data['similar']['results'] as $similar_movie ) {
             if ( $similar_count >= 6 ) break;
@@ -136,12 +137,12 @@ function tmdb_show_movie_detail( $atts ) {
             $similar_id = intval( $similar_movie['id'] );
             $similar_poster = $similar_movie['poster_path'] ? esc_url( 'https://image.tmdb.org/t/p/w200' . $similar_movie['poster_path'] ) : '';
             
-            $similar_html .= '<div class="similar-movie" style="flex: 0 0 150px; text-align: center;">';
-            $similar_html .= '<a href="?movie_id=' . $similar_id . '" style="text-decoration: none; color: #333;">';
+            $similar_html .= '<div class="movie-detail__similar-movie">';
+            $similar_html .= '<a href="?movie_id=' . $similar_id . '" class="movie-detail__similar-link">';
             if ( $similar_poster ) {
-                $similar_html .= '<img src="' . $similar_poster . '" alt="' . $similar_title . '" style="width: 100%; height: auto; border-radius: 4px; margin-bottom: 5px;">';
+                $similar_html .= '<img src="' . $similar_poster . '" alt="' . $similar_title . '" class="movie-detail__similar-poster">';
             }
-            $similar_html .= '<small>' . $similar_title . '</small>';
+            $similar_html .= '<small class="movie-detail__similar-title">' . $similar_title . '</small>';
             $similar_html .= '</a></div>';
             $similar_count++;
         }
@@ -149,75 +150,78 @@ function tmdb_show_movie_detail( $atts ) {
     }
     
     // Build output HTML
-    $output = '<div class="movie-detail" style="max-width: 1000px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,.1); font-family: Arial, sans-serif;">';
+    $output = '<div class="movie-detail">';
     
     // Header section with poster and basic info
-    $output .= '<div class="movie-header" style="display: flex; gap: 20px; margin-bottom: 30px; flex-wrap: wrap;">';
+    $output .= '<div class="movie-detail__header">';
     
     if ( $poster ) {
-        $output .= '<div class="poster-section" style="flex: 0 0 300px;">';
-        $output .= '<img src="' . $poster . '" alt="' . $title . '" style="width: 100%; height: auto; border-radius: 6px;">';
+        $output .= '<div class="movie-detail__poster-section">';
+        $output .= '<img src="' . $poster . '" alt="' . $title . '" class="movie-detail__poster">';
         $output .= '</div>';
     }
     
-    $output .= '<div class="info-section" style="flex: 1; min-width: 300px;">';
-    $output .= '<h1 style="margin: 0 0 15px 0; color: #333;">' . $title . '</h1>';
+    $output .= '<div class="movie-detail__info-section">';
+    $output .= '<h1 class="movie-detail__title">' . $title . '</h1>';
     
     if ( $genres_text ) {
-        $output .= '<p><strong>Genres:</strong> ' . $genres_text . '</p>';
+        $output .= '<p class="movie-detail__info-item"><strong>Genres:</strong> ' . $genres_text . '</p>';
     }
     
-    $output .= '<p><strong>Release Date:</strong> ' . $release_date . '</p>';
-    $output .= '<p><strong>Original Language:</strong> ' . strtoupper( $original_language ) . '</p>';
-    $output .= '<p><strong>Popularity:</strong> ' . $popularity . '</p>';
+    $output .= '<p class="movie-detail__info-item"><strong>Release Date:</strong> ' . $release_date . '</p>';
+    $output .= '<p class="movie-detail__info-item"><strong>Original Language:</strong> ' . strtoupper( $original_language ) . '</p>';
+    $output .= '<p class="movie-detail__info-item"><strong>Popularity:</strong> ' . $popularity . '</p>';
+    $output .= '<p class="movie-detail__overview-item"><strong>Overview:</strong> ' . $overview . '</p>';
     
     if ( $companies_text ) {
-        $output .= '<p><strong>Production Companies:</strong> ' . $companies_text . '</p>';
+        $output .= '<p class="movie-detail__info-item"><strong>Production Companies:</strong> ' . $companies_text . '</p>';
     }
     
     if ( $alt_titles_text ) {
-        $output .= '<p><strong>Alternative Titles:</strong> ' . $alt_titles_text . '</p>';
+        $output .= '<p class="movie-detail__info-item"><strong>Alternative Titles:</strong> ' . $alt_titles_text . '</p>';
     }
     
-    $output .= '</div></div>'; // Close movie-header
+    // WISHLIST BUTTON ADDED
+    $output .= '<div class="movie-detail__wishlist-container">';
+    $output .= tmdb_get_wishlist_button($movie_id, $title, $poster);
+    $output .= '</div>';
+
+   
     
-    // Trailer section
+    $output .= '</div>';
+    
+      // Trailer section
     if ( $trailer_url ) {
-        $output .= '<div class="trailer-section" style="margin-bottom: 30px;">';
-        $output .= '<h3 style="color: #333; margin-bottom: 15px;">Trailer</h3>';
-        $output .= '<div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden;">';
-        $output .= '<iframe src="' . $trailer_url . '" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none;" allowfullscreen></iframe>';
+        $output .= '<div class="movie-detail__trailer-section">';
+        $output .= '<h1 class="movie-detail__section-title">Trailer</h1>';
+        $output .= '<div class="movie-detail__trailer-container">';
+        $output .= '<iframe src="' . $trailer_url . '" class="movie-detail__trailer-iframe" allowfullscreen></iframe>';
         $output .= '</div></div>';
     }
+    $output .= '</div>'; // Close header
     
-    // Overview section
-    if ( $overview ) {
-        $output .= '<div class="overview-section" style="margin-bottom: 30px;">';
-        $output .= '<h3 style="color: #333; margin-bottom: 10px;">Overview</h3>';
-        $output .= '<p style="line-height: 1.6; color: #555;">' . $overview . '</p>';
-        $output .= '</div>';
-    }
-    
+   
+        
     // Cast section
     if ( $cast_html ) {
-        $output .= '<div class="cast-section" style="margin-bottom: 30px;">';
-        $output .= '<h3 style="color: #333; margin-bottom: 15px;">Cast</h3>';
+        $output .= '<div class="movie-detail__cast-section">';
+        $output .= '<h3 class="movie-detail__section-title">Cast</h3>';
         $output .= $cast_html;
         $output .= '</div>';
     }
     
     // Reviews section
     if ( $reviews_html ) {
-        $output .= '<div class="reviews-section" style="margin-bottom: 30px;">';
-        $output .= '<h3 style="color: #333; margin-bottom: 15px;">Reviews</h3>';
+        $output .= '<div class="movie-detail__reviews-section">';
+        $output .= '<h3 class="movie-detail__section-title">Reviews</h3>';
         $output .= $reviews_html;
         $output .= '</div>';
     }
     
     // Similar movies section
     if ( $similar_html ) {
-        $output .= '<div class="similar-section" style="margin-bottom: 30px;">';
-        $output .= '<h3 style="color: #333; margin-bottom: 15px;">Similar Movies</h3>';
+        $output .= '<div class="movie-detail__similar-section">';
+        $output .= '<h3 class="movie-detail__section-title">Similar Movies</h3>';
         $output .= $similar_html;
         $output .= '</div>';
     }

@@ -1,0 +1,63 @@
+@use "abstracts/variables" as *;
+@use "abstracts/mixins" as *;  
+
+#tmdb-pagination-actors{
+    span{
+        margin: 2rem;
+        font-family: var(--font-secondary);
+        font-size: 1.4rem;
+        color: var(--pink-color);
+        font-weight: bold;
+    }
+}
+
+
+.tmdb-pagination{
+    background: #89CDA4;
+    background: linear-gradient(180deg, rgba(137, 205, 164, 1) 0%, rgba(82, 193, 191, 1) 50%, rgba(0, 180, 228, 1) 100%);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+     @include mq(md) {
+               flex-direction: row;
+            }
+
+    
+    &__current, &__nav{
+        text-decoration: none;
+        color: #fff;
+        font-family: var(--font-secondary);
+        font-size: 2rem;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        margin: 0 0.5rem;
+        background-color: var(--pink-color)
+
+    }
+
+    &__link{
+        margin: .7rem;
+        text-decoration: none;
+        color: #fff;
+        font-family: var(--font-secondary);
+        font-size: 2rem;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        background-color: var(--primary-color);
+        
+        &:hover{
+            background-color: var(--pink-color);
+            color: #fff;
+            transition: all 0.3s ease;
+        }
+    }
+
+    &__info{
+        font-size: 1.5rem;
+        font-family: var(--font-secondary);
+    }
+        
+     
+}

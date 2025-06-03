@@ -1,0 +1,40 @@
+{
+  "name": "tmdb-movies",
+  "version": "1.0.0",
+  "description": "Plugin de WordPress con SCSS y Gulp",
+  "main": "gulpfile.js",
+  "scripts": {
+    "dev": "gulp dev",
+    "build": "gulp build",
+    "watch": "gulp watch",
+    "scss": "gulp scss"
+  },
+  "keywords": [
+    "wordpress",
+    "plugin",
+    "scss",
+    "gulp"
+  ],
+  "author": "Nicolas Castro",
+  "license": "MIT",
+  "devDependencies": {
+    "browser-sync": "^2.29.3",
+    "gulp": "^4.0.2",
+    "gulp-autoprefixer": "^8.0.0",
+    "gulp-clean-css": "^4.3.0",
+    "gulp-notify": "^4.0.0",
+    "gulp-plumber": "^1.2.1",
+    "gulp-rename": "^2.0.0",
+    "gulp-sass": "^5.1.0",
+    "gulp-sourcemaps": "^3.0.0",
+    "sass": "^1.89.1"
+  },
+  "browserslist": [
+    "last 2 versions",
+    "> 1%",
+    "ie >= 11"
+  ],
+  "dependencies": {
+    "lightbox2": "^2.11.5"
+  }
+}
