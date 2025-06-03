@@ -17,26 +17,125 @@ foreach ( glob( plugin_dir_path( __FILE__ ) . 'shortcodes/*.php' ) as $file ) {
 require_once plugin_dir_path( __FILE__ ) . 'tmdb-functions.php';
 
 function tmdb_get_api_key() {
-    // Opción 1: Desde wp_options (recomendado)
     return get_option('tmdb_api_key', '');
-    
-    // Opción 2: Hardcodeada (no recomendado para producción)
-    // return 'tu_api_key_aqui';
 }
 
-// Agregar página de configuración en el admin
-add_action('admin_menu', 'tmdb_admin_menu');
+add_action('admin_menu', 'tmdb_admin_menu', 9);
 function tmdb_admin_menu() {
-    add_options_page(
+    add_menu_page(
+        'TMDb Movies',
+        'TMDb Movies',
+        'manage_options',
+        'tmdb-movies',
+        'tmdb_main_page',
+        'dashicons-video-alt3',
+        30
+    );
+    
+    add_submenu_page(
+        'tmdb-movies',
         'TMDb Settings',
-        'TMDb Settings',
+        'Settings',
         'manage_options',
         'tmdb-settings',
         'tmdb_settings_page'
     );
+    
+    add_submenu_page(
+        'tmdb-movies',
+        'All Movies',
+        'All Movies',
+        'manage_options',
+        'tmdb-all-movies',
+        'tmdb_all_movies_admin_page'
+    );
+    
+    add_submenu_page(
+        'tmdb-movies',
+        'Upcoming Movies',
+        'Upcoming Movies',
+        'manage_options',
+        'tmdb-upcoming-movies',
+        'tmdb_upcoming_movies_admin_page'
+    );
+    
+    add_options_page(
+        'TMDb Settings',
+        'TMDb Settings',
+        'manage_options',
+        'tmdb-settings-backup',
+        'tmdb_settings_page'
+    );
 }
 
-// Página de configuración
+function tmdb_main_page() {
+    ?>
+    <div class="wrap">
+        <h1>TMDb Movies Plugin</h1>
+        <div class="card" style="max-width: none;">
+            <h2>Welcome to TMDb Movies Plugin</h2>
+            <p>This plugin allows you to display movie information from The Movie Database (TMDb).</p>
+            
+            <h3>Auto-created pages:</h3>
+            <ul>
+                <li><a href="<?php echo home_url('/all-movies'); ?>" target="_blank">All Movies</a></li>
+                <li><a href="<?php echo home_url('/upcoming-movies'); ?>" target="_blank">Upcoming Movies</a></li>
+                <li><a href="<?php echo home_url('/my-wishlist'); ?>" target="_blank">My Wishlist</a></li>
+            </ul>
+            
+            <h3>Quick actions:</h3>
+            <p>
+                <a href="<?php echo admin_url('admin.php?page=tmdb-settings'); ?>" class="button button-primary">Configure API Key</a>
+                <a href="<?php echo admin_url('admin.php?page=tmdb-all-movies'); ?>" class="button">View All Movies</a>
+                <a href="<?php echo admin_url('admin.php?page=tmdb-upcoming-movies'); ?>" class="button">Upcoming Movies</a>
+            </p>
+            
+            <h3>System status:</h3>
+            <?php
+            $api_key = get_option('tmdb_api_key', '');
+            if (empty($api_key)) {
+                echo '<p style="color: #d63638;"><strong>⚠️ API Key not configured</strong> - <a href="' . admin_url('admin.php?page=tmdb-settings') . '">Configure now</a></p>';
+            } else {
+                echo '<p style="color: #00a32a;"><strong>✅ API Key configured correctly</strong></p>';
+            }
+            
+            global $wpdb;
+            $table = $wpdb->prefix . 'tmdb_wishlist';
+            $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table'") == $table;
+            
+            if ($table_exists) {
+                echo '<p style="color: #00a32a;"><strong>✅ Wishlist table created</strong></p>';
+            } else {
+                echo '<p style="color: #d63638;"><strong>⚠️ Wishlist table does not exist</strong> - Will be created automatically</p>';
+            }
+            ?>
+        </div>
+    </div>
+    <?php
+}
+
+function tmdb_all_movies_admin_page() {
+    ?>
+    <div class="wrap">
+        <h1>All Movies - Preview</h1>
+        <p>This is a preview of the "All Movies" page on the frontend:</p>
+        <iframe src="<?php echo home_url('/all-movies'); ?>" width="100%" height="600" style="border: 1px solid #ccc;"></iframe>
+        <p><a href="<?php echo home_url('/all-movies'); ?>" target="_blank" class="button button-primary">View full page</a></p>
+    </div>
+    <?php
+}
+
+function tmdb_upcoming_movies_admin_page() {
+    ?>
+    <div class="wrap">
+        <h1>Upcoming Movies - Preview</h1>
+        <p>This is a preview of the "Upcoming Movies" page on the frontend:</p>
+        <iframe src="<?php echo home_url('/upcoming-movies'); ?>" width="100%" height="600" style="border: 1px solid #ccc;"></iframe>
+        <p><a href="<?php echo home_url('/upcoming-movies'); ?>" target="_blank" class="button button-primary">View full page</a></p>
+    </div>
+    <?php
+}
+
 function tmdb_settings_page() {
     if (isset($_POST['submit'])) {
         update_option('tmdb_api_key', sanitize_text_field($_POST['tmdb_api_key']));
@@ -60,7 +159,6 @@ function tmdb_settings_page() {
             <?php submit_button(); ?>
         </form>
         
-        <!-- SECCIÓN DE DEBUG AGREGADA -->
         <hr>
         <h2>Debug Tools</h2>
         <div style="background:#f9f9f9;padding:15px;border-radius:4px;margin:20px 0;">
@@ -74,22 +172,16 @@ function tmdb_settings_page() {
     <?php
 }
 
-// Hook de activación del plugin
 register_activation_hook(__FILE__, 'tmdb_plugin_activate');
 function tmdb_plugin_activate() {
-    // Crear tabla de wishlist
     if (function_exists('tmdb_create_wishlist_table')) {
         tmdb_create_wishlist_table();
     }
     
-    // Crear páginas necesarias
     tmdb_create_pages();
-    
-    // Flush rewrite rules
     flush_rewrite_rules();
 }
 
-// Función para crear páginas automáticamente
 function tmdb_create_pages() {
     $pages = array(
         'all-movies' => array(
@@ -111,7 +203,6 @@ function tmdb_create_pages() {
     );
     
     foreach ($pages as $slug => $page_data) {
-        // Verificar si la página ya existe
         $page = get_page_by_path($slug);
         if (!$page) {
             wp_insert_post(array(
@@ -125,15 +216,12 @@ function tmdb_create_pages() {
     }
 }
 
-// Hook de desactivación del plugin
 register_deactivation_hook(__FILE__, 'tmdb_plugin_deactivate');
 function tmdb_plugin_deactivate() {
-    // Limpiar transients
     delete_transient('tmdb_genres_cache');
     flush_rewrite_rules();
 }
 
-// FORZAR CREACIÓN DE TABLA SI NO EXISTE (CÓDIGO TEMPORAL)
 add_action('wp_loaded', 'tmdb_ensure_table_exists');
 function tmdb_ensure_table_exists() {
     global $wpdb;
@@ -145,7 +233,6 @@ function tmdb_ensure_table_exists() {
     }
 }
 
-// Verificar si la tabla existe al cargar el admin
 add_action('admin_notices', 'tmdb_check_table_exists');
 function tmdb_check_table_exists() {
     global $wpdb;
@@ -153,11 +240,10 @@ function tmdb_check_table_exists() {
     $table_exists = $wpdb->get_var("SHOW TABLES LIKE '$table'") == $table;
     
     if (!$table_exists && current_user_can('administrator')) {
-        echo '<div class="notice notice-error"><p><strong>TMDb Plugin:</strong> Wishlist table is missing. <a href="' . admin_url('options-general.php?page=tmdb-settings') . '">Click here to go to settings and create it</a></p></div>';
+        echo '<div class="notice notice-error"><p><strong>TMDb Plugin:</strong> Wishlist table is missing. <a href="' . admin_url('admin.php?page=tmdb-settings') . '">Click here to go to settings and create it</a></p></div>';
     }
 }
 
-// Agregar enlaces útiles en el menú de administración
 add_action('admin_bar_menu', 'tmdb_admin_bar_links', 100);
 function tmdb_admin_bar_links($wp_admin_bar) {
     if (!current_user_can('manage_options')) return;
@@ -190,11 +276,7 @@ function tmdb_admin_bar_links($wp_admin_bar) {
     ));
 }
 
-
-
-
 function tmdb_plugin_enqueue_assets() {
-    // Tu CSS
     wp_enqueue_style(
         'tmdb-plugin-styles',
         plugin_dir_url(__FILE__) . 'assets/css/main.min.css',
@@ -202,7 +284,6 @@ function tmdb_plugin_enqueue_assets() {
         '1.0.0'
     );
     
-    // Lightbox2 desde CDN (SIEMPRE disponible)
     wp_enqueue_style(
         'lightbox2-css',
         'https://cdnjs.cloudflare.com/ajax/libs/lightbox2/2.11.4/css/lightbox.min.css',
@@ -221,16 +302,5 @@ function tmdb_plugin_enqueue_assets() {
     );
 }
 add_action('wp_enqueue_scripts', 'tmdb_plugin_enqueue_assets');
-
-
-
-
-
- 
-
-
-
-
-
 
 ?>
